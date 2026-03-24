@@ -7,506 +7,191 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="消耗品メモ">
 <title>消耗品トラッカー</title>
-  <link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #F7F5F0;
-  --surface: #FFFFFF;
-  --surface2: #F0EDE8;
-  --text: #1A1815;
-  --text2: #6B6760;
-  --text3: #A8A49F;
-  --border: rgba(26,24,21,0.1);
-  --border2: rgba(26,24,21,0.18);
-  --urgent: #C8392A;
-  --urgent-bg: #FDF0EE;
-  --warn: #B8780A;
-  --warn-bg: #FDF5E6;
-  --ok: #2D7A4F;
-  --ok-bg: #EAF5EF;
-  --accent: #1A1815;
-  --radius: 14px;
-  --radius-sm: 8px;
+  --bg: #F7F5F0; --surface: #FFFFFF; --surface2: #F0EDE8;
+  --text: #1A1815; --text2: #6B6760; --text3: #A8A49F;
+  --border: rgba(26,24,21,0.1); --border2: rgba(26,24,21,0.18);
+  --urgent: #C8392A; --urgent-bg: #FDF0EE;
+  --warn: #B8780A; --warn-bg: #FDF5E6;
+  --ok: #2D7A4F; --ok-bg: #EAF5EF;
+  --accent: #1A1815; --radius: 14px; --radius-sm: 8px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #131210;
-    --surface: #1E1C19;
-    --surface2: #272420;
-    --text: #F0EDE8;
-    --text2: #9E9A95;
-    --text3: #5A5752;
-    --border: rgba(240,237,232,0.1);
-    --border2: rgba(240,237,232,0.18);
-    --urgent-bg: #2A1510;
-    --warn-bg: #251A08;
-    --ok-bg: #0E1F15;
+    --bg: #131210; --surface: #1E1C19; --surface2: #272420;
+    --text: #F0EDE8; --text2: #9E9A95; --text3: #5A5752;
+    --border: rgba(240,237,232,0.1); --border2: rgba(240,237,232,0.18);
+    --urgent-bg: #2A1510; --warn-bg: #251A08; --ok-bg: #0E1F15;
   }
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; overscroll-behavior: none; }
+.app { max-width: 480px; margin: 0 auto; padding-bottom: calc(80px + var(--safe-bottom)); }
 
-body {
-  font-family: 'Noto Sans JP', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100dvh;
-  overscroll-behavior: none;
-}
-
-.app {
-  max-width: 480px;
-  margin: 0 auto;
-  padding-bottom: calc(80px + var(--safe-bottom));
-}
-
-/* Header */
-.header {
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  padding: calc(var(--safe-top) + 16px) 20px 12px;
-  z-index: 50;
-  border-bottom: 1px solid var(--border);
-}
-
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.app-title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--text);
-}
-
-.add-fab {
-  width: 40px; height: 40px;
-  background: var(--accent);
-  color: var(--surface);
-  border: none;
-  border-radius: 50%;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.15s, opacity 0.15s;
-}
+.header { position: sticky; top: 0; background: var(--bg); padding: calc(var(--safe-top) + 16px) 20px 12px; z-index: 50; border-bottom: 1px solid var(--border); }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.app-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.add-fab { width: 40px; height: 40px; background: var(--accent); color: var(--surface); border: none; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, opacity 0.15s; }
 .add-fab:active { transform: scale(0.92); opacity: 0.8; }
 
-/* Stats */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 0 20px 14px;
-}
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 20px 14px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+.stat-num { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 10px; color: var(--text3); }
 
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 8px;
-  text-align: center;
-}
-.stat-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.stat-label {
-  font-size: 10px;
-  color: var(--text3);
-  letter-spacing: 0.3px;
-}
-
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 0 20px;
-  scrollbar-width: none;
-}
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 0 20px; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink: 0; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 12px; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.tab.active { background: var(--accent); color: var(--surface); border-color: var(--accent); }
 
-.tab {
-  flex-shrink: 0;
-  padding: 6px 13px;
-  border-radius: 999px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text2);
-  font-size: 12px;
-  font-family: 'Noto Sans JP', sans-serif;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.tab.active {
-  background: var(--accent);
-  color: var(--surface);
-  border-color: var(--accent);
-}
+.list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
 
-/* List */
-.list {
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.item-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  transition: transform 0.12s;
-  position: relative;
-}
+.item-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; position: relative; transition: transform 0.12s; }
 .item-card:active { transform: scale(0.985); }
-
-.item-inner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 14px 14px 16px;
-}
-
-.status-bar {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  border-radius: 3px 0 0 3px;
-}
+.item-inner { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 16px; }
+.status-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
 .status-bar.urgent { background: var(--urgent); }
 .status-bar.warning { background: var(--warn); }
 .status-bar.ok { background: var(--ok); }
 
-.item-icon-wrap {
-  width: 44px; height: 44px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-}
-.icon-bath { background: #E8F2FC; }
-.icon-cloth { background: #EEF0FE; }
-.icon-kitchen { background: #EAF5EE; }
-.icon-health { background: #FDEEE9; }
+.item-thumb { width: 52px; height: 52px; border-radius: 10px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+.item-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.item-thumb.no-photo { }
+.icon-bath { background: #E8F2FC; } .icon-cloth { background: #EEF0FE; }
+.icon-kitchen { background: #EAF5EE; } .icon-health { background: #FDEEE9; }
 .icon-other { background: var(--surface2); }
 
 .item-body { flex: 1; min-width: 0; }
-.item-name {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.item-sub {
-  font-size: 11px;
-  color: var(--text3);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.history-pill {
-  background: var(--surface2);
-  color: var(--text2);
-  border-radius: 999px;
-  padding: 1px 7px;
-  font-size: 10px;
-}
+.item-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-sub { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.history-pill { background: var(--surface2); color: var(--text2); border-radius: 999px; padding: 1px 7px; font-size: 10px; }
 
-.item-right {
-  text-align: right;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-.days-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 1;
-}
-.days-badge.urgent { color: var(--urgent); }
-.days-badge.warning { color: var(--warn); }
-.days-badge.ok { color: var(--ok); }
-
-.days-unit {
-  font-size: 10px;
-  color: var(--text3);
-  margin-top: 1px;
-}
-
-.item-btns {
-  display: flex;
-  gap: 6px;
-}
-
-.ibtn {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text2);
-  font-size: 13px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.12s;
-}
+.item-right { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.days-badge { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; line-height: 1; }
+.days-badge.urgent { color: var(--urgent); } .days-badge.warning { color: var(--warn); } .days-badge.ok { color: var(--ok); }
+.days-unit { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.item-btns { display: flex; gap: 6px; }
+.ibtn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
 .ibtn:active { transform: scale(0.9); }
 .ibtn.ok-btn { color: var(--ok); border-color: var(--ok); }
 .ibtn.ok-btn:active { background: var(--ok-bg); }
 .ibtn.del-btn:active { background: var(--urgent-bg); color: var(--urgent); }
 
-/* Empty */
-.empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text3);
-}
+.empty { text-align: center; padding: 60px 20px; color: var(--text3); }
 .empty-icon { font-size: 48px; margin-bottom: 12px; }
-.empty p { font-size: 14px; }
 
-/* Modal */
-.modal-bg {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 200;
-  align-items: flex-end;
-  justify-content: center;
-}
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: flex-end; justify-content: center; }
 .modal-bg.open { display: flex; }
-
-.modal {
-  background: var(--surface);
-  border-radius: 20px 20px 0 0;
-  padding: 24px 20px calc(24px + var(--safe-bottom));
-  width: 100%;
-  max-width: 480px;
-  max-height: 90dvh;
-  overflow-y: auto;
-  animation: slideUp 0.25s cubic-bezier(0.32,0.72,0,1);
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.modal-handle {
-  width: 36px; height: 4px;
-  background: var(--border2);
-  border-radius: 2px;
-  margin: 0 auto 20px;
-}
-
-.modal-title {
-  font-size: 17px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: var(--text);
-}
+.modal { background: var(--surface); border-radius: 20px 20px 0 0; padding: 24px 20px calc(24px + var(--safe-bottom)); width: 100%; max-width: 480px; max-height: 92dvh; overflow-y: auto; animation: slideUp 0.25s cubic-bezier(0.32,0.72,0,1); }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
 
 .field { margin-bottom: 16px; }
-.field label {
-  display: block;
-  font-size: 12px;
-  color: var(--text2);
-  margin-bottom: 6px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-}
-.field input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border2);
-  background: var(--surface2);
-  color: var(--text);
-  font-size: 16px;
-  font-family: 'Noto Sans JP', sans-serif;
-  outline: none;
-  -webkit-appearance: none;
+.field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+.field input[type="text"], .field input[type="number"], .field input[type="date"] {
+  width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border2);
+  background: var(--surface2); color: var(--text); font-size: 16px; font-family: 'Noto Sans JP', sans-serif;
+  outline: none; -webkit-appearance: none;
 }
 .field input:focus { border-color: var(--accent); }
-
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-.cat-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-}
-.cat-btn {
-  padding: 10px 4px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  transition: all 0.12s;
-}
+.cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.cat-btn { padding: 10px 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.12s; }
 .cat-btn .emoji { font-size: 20px; line-height: 1; }
 .cat-btn .lbl { font-size: 9px; color: var(--text2); font-family: 'Noto Sans JP', sans-serif; }
-.cat-btn.sel {
-  border-color: var(--accent);
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
+.cat-btn.sel { border-color: var(--accent); background: var(--surface); box-shadow: inset 0 0 0 1px var(--accent); }
 
-.modal-footer {
-  display: flex;
-  gap: 10px;
-  margin-top: 24px;
-}
-.btn-cancel {
-  flex: 1;
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text2);
-  font-size: 15px;
-  font-family: 'Noto Sans JP', sans-serif;
-  cursor: pointer;
-}
-.btn-save {
-  flex: 2;
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: var(--accent);
-  color: var(--surface);
-  font-size: 15px;
-  font-weight: 700;
-  font-family: 'Noto Sans JP', sans-serif;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
+.photo-upload-area { border: 1.5px dashed var(--border2); border-radius: var(--radius-sm); background: var(--surface2); cursor: pointer; overflow: hidden; transition: border-color 0.15s; }
+.photo-upload-area:active { border-color: var(--accent); }
+.photo-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; color: var(--text3); }
+.photo-placeholder .ph-icon { font-size: 28px; }
+.photo-placeholder p { font-size: 13px; }
+.photo-upload-area input[type="file"] { display: none; }
+.photo-preview-wrap { position: relative; }
+.photo-preview-wrap img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
+.photo-remove-btn { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(0,0,0,0.55); color: #fff; border: none; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+.btn-cancel { flex: 1; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text2); font-size: 15px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; }
+.btn-save { flex: 2; padding: 14px; border-radius: var(--radius-sm); border: none; background: var(--accent); color: var(--surface); font-size: 15px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; }
 .btn-save:active { opacity: 0.75; }
 
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: calc(24px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--text);
-  color: var(--surface);
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.25s;
-  white-space: nowrap;
-  z-index: 500;
-  pointer-events: none;
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.photo-viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 300; align-items: center; justify-content: center; }
+.photo-viewer.open { display: flex; }
+.photo-viewer img { max-width: 92vw; max-height: 80dvh; border-radius: 10px; object-fit: contain; }
+.photo-viewer-close { position: absolute; top: calc(var(--safe-top) + 16px); right: 20px; width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.toast { position: fixed; bottom: calc(24px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--surface); border-radius: 999px; padding: 10px 20px; font-size: 13px; font-weight: 500; opacity: 0; transition: all 0.25s; white-space: nowrap; z-index: 500; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-
 <div class="app">
   <div class="header">
     <div class="header-top">
       <h1 class="app-title">消耗品メモ</h1>
-      <button class="add-fab" onclick="openModal()" aria-label="追加">＋</button>
+      <button class="add-fab" onclick="openModal()">＋</button>
     </div>
     <div class="stats-row">
-      <div class="stat">
-        <div class="stat-num" id="s-urgent" style="color:var(--urgent)">-</div>
-        <div class="stat-label">要交換</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="s-warn" style="color:var(--warn)">-</div>
-        <div class="stat-label">もうすぐ</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="s-ok" style="color:var(--ok)">-</div>
-        <div class="stat-label">問題なし</div>
-      </div>
+      <div class="stat"><div class="stat-num" id="s-urgent" style="color:var(--urgent)">-</div><div class="stat-label">要交換</div></div>
+      <div class="stat"><div class="stat-num" id="s-warn" style="color:var(--warn)">-</div><div class="stat-label">もうすぐ</div></div>
+      <div class="stat"><div class="stat-num" id="s-ok" style="color:var(--ok)">-</div><div class="stat-label">問題なし</div></div>
     </div>
-    <div class="tabs" id="tabs">
-      <button class="tab active" data-f="all" onclick="setFilter('all',this)">すべて</button>
-      <button class="tab" data-f="bath" onclick="setFilter('bath',this)">お風呂</button>
-      <button class="tab" data-f="cloth" onclick="setFilter('cloth',this)">衣類</button>
-      <button class="tab" data-f="kitchen" onclick="setFilter('kitchen',this)">キッチン</button>
-      <button class="tab" data-f="health" onclick="setFilter('health',this)">健康</button>
-      <button class="tab" data-f="other" onclick="setFilter('other',this)">その他</button>
+    <div class="tabs">
+      <button class="tab active" onclick="setFilter('all',this)">すべて</button>
+      <button class="tab" onclick="setFilter('bath',this)">お風呂</button>
+      <button class="tab" onclick="setFilter('cloth',this)">衣類</button>
+      <button class="tab" onclick="setFilter('kitchen',this)">キッチン</button>
+      <button class="tab" onclick="setFilter('health',this)">健康</button>
+      <button class="tab" onclick="setFilter('other',this)">その他</button>
     </div>
   </div>
-
   <div class="list" id="list"></div>
 </div>
 
-<!-- Modal -->
 <div class="modal-bg" id="modal-bg" onclick="bgClick(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-title">アイテムを追加</div>
-
+    <div class="field">
+      <label>写真（タップして選択またはカメラ撮影）</label>
+      <div class="photo-upload-area" id="photo-upload-area" onclick="triggerPhoto()">
+        <div class="photo-placeholder" id="photo-placeholder">
+          <div class="ph-icon">📷</div>
+          <p>タップして写真を追加</p>
+        </div>
+        <div class="photo-preview-wrap" id="photo-preview-wrap" style="display:none">
+          <img id="photo-preview" src="" alt="" />
+          <button class="photo-remove-btn" onclick="removePhoto(event)">✕</button>
+        </div>
+        <input type="file" id="f-photo" accept="image/*" onchange="onPhotoSelected(event)" />
+      </div>
+    </div>
     <div class="field">
       <label>アイテム名</label>
-      <input id="f-name" type="text" placeholder="例: 歯ブラシ" />
+      <input id="f-name" type="text" placeholder="例: Tシャツ（白・ユニクロ）" />
     </div>
     <div class="field">
       <label>カテゴリ</label>
       <div class="cat-grid">
-        <button class="cat-btn sel" data-cat="bath" onclick="selCat('bath',this)">
-          <span class="emoji">🪥</span><span class="lbl">お風呂</span>
-        </button>
-        <button class="cat-btn" data-cat="cloth" onclick="selCat('cloth',this)">
-          <span class="emoji">👕</span><span class="lbl">衣類</span>
-        </button>
-        <button class="cat-btn" data-cat="kitchen" onclick="selCat('kitchen',this)">
-          <span class="emoji">🍳</span><span class="lbl">キッチン</span>
-        </button>
-        <button class="cat-btn" data-cat="health" onclick="selCat('health',this)">
-          <span class="emoji">💊</span><span class="lbl">健康</span>
-        </button>
-        <button class="cat-btn" data-cat="other" onclick="selCat('other',this)">
-          <span class="emoji">📦</span><span class="lbl">その他</span>
-        </button>
+        <button class="cat-btn sel" data-cat="bath" onclick="selCat('bath',this)"><span class="emoji">🪥</span><span class="lbl">お風呂</span></button>
+        <button class="cat-btn" data-cat="cloth" onclick="selCat('cloth',this)"><span class="emoji">👕</span><span class="lbl">衣類</span></button>
+        <button class="cat-btn" data-cat="kitchen" onclick="selCat('kitchen',this)"><span class="emoji">🍳</span><span class="lbl">キッチン</span></button>
+        <button class="cat-btn" data-cat="health" onclick="selCat('health',this)"><span class="emoji">💊</span><span class="lbl">健康</span></button>
+        <button class="cat-btn" data-cat="other" onclick="selCat('other',this)"><span class="emoji">📦</span><span class="lbl">その他</span></button>
       </div>
     </div>
     <div class="field-row">
-      <div class="field">
-        <label>交換サイクル（日）</label>
-        <input id="f-cycle" type="number" inputmode="numeric" placeholder="30" min="1" />
-      </div>
-      <div class="field">
-        <label>前回交換日</label>
-        <input id="f-date" type="date" />
-      </div>
+      <div class="field"><label>交換サイクル（日）</label><input id="f-cycle" type="number" inputmode="numeric" placeholder="30" min="1" /></div>
+      <div class="field"><label>前回交換日</label><input id="f-date" type="date" /></div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
@@ -515,147 +200,127 @@ body {
   </div>
 </div>
 
+<div class="photo-viewer" id="photo-viewer" onclick="closeViewer()">
+  <button class="photo-viewer-close" onclick="closeViewer()">✕</button>
+  <img id="viewer-img" src="" alt="" />
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-const DB_NAME = 'consumable-tracker';
-const DB_VER = 1;
-const STORE = 'items';
+const DB_NAME='consumable-tracker', DB_VER=2, STORE='items';
+const CAT_ICON={bath:'🪥',cloth:'👕',kitchen:'🍳',health:'💊',other:'📦'};
+const CAT_CLS={bath:'icon-bath',cloth:'icon-cloth',kitchen:'icon-kitchen',health:'icon-health',other:'icon-other'};
 
-const CAT_ICON = { bath:'🪥', cloth:'👕', kitchen:'🍳', health:'💊', other:'📦' };
-const CAT_CLS  = { bath:'icon-bath', cloth:'icon-cloth', kitchen:'icon-kitchen', health:'icon-health', other:'icon-other' };
+function da(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
 
-function da(n) {
-  const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10);
-}
-
-const DEFAULTS = [
-  {id:1,name:'歯ブラシ',cat:'bath',cycle:30,lastReplaced:da(25),icon:'🪥',history:[da(55),da(25)]},
-  {id:2,name:'バスタオル',cat:'bath',cycle:90,lastReplaced:da(80),icon:'🛁',history:[da(170),da(80)]},
-  {id:3,name:'Tシャツ（白）',cat:'cloth',cycle:180,lastReplaced:da(60),icon:'👕',history:[da(240),da(60)]},
-  {id:4,name:'台所スポンジ',cat:'kitchen',cycle:14,lastReplaced:da(10),icon:'🧽',history:[da(24),da(10)]},
-  {id:5,name:'コンタクトレンズ',cat:'health',cycle:30,lastReplaced:da(2),icon:'👁️',history:[da(32),da(2)]},
-  {id:6,name:'まな板',cat:'kitchen',cycle:365,lastReplaced:da(400),icon:'🪓',history:[da(400)]},
+const DEFAULTS=[
+  {id:1,name:'歯ブラシ',cat:'bath',cycle:30,lastReplaced:da(25),icon:'🪥',history:[da(55),da(25)],photo:null},
+  {id:2,name:'バスタオル',cat:'bath',cycle:90,lastReplaced:da(80),icon:'🛁',history:[da(170),da(80)],photo:null},
+  {id:3,name:'Tシャツ（白・ユニクロ）',cat:'cloth',cycle:180,lastReplaced:da(60),icon:'👕',history:[da(240),da(60)],photo:null},
+  {id:4,name:'台所スポンジ',cat:'kitchen',cycle:14,lastReplaced:da(10),icon:'🧽',history:[da(24),da(10)],photo:null},
+  {id:5,name:'コンタクトレンズ',cat:'health',cycle:30,lastReplaced:da(2),icon:'👁️',history:[da(32),da(2)],photo:null},
+  {id:6,name:'まな板',cat:'kitchen',cycle:365,lastReplaced:da(400),icon:'🪓',history:[da(400)],photo:null},
 ];
 
-let db, items=[], nextId=10, filter='all', editId=null, selCatVal='bath';
+let db,items=[],nextId=10,filter='all',editId=null,selCatVal='bath',currentPhoto=null;
 
-// IndexedDB
-function openDB() {
-  return new Promise((res,rej) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => {
-      const d = e.target.result;
-      if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, {keyPath:'id'});
-    };
-    req.onsuccess = e => res(e.target.result);
-    req.onerror = e => rej(e);
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id'});};
+    req.onsuccess=e=>res(e.target.result);
+    req.onerror=e=>rej(e);
   });
 }
+function getAllItems(){return new Promise(res=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>res([]);});}
+function putItem(item){return new Promise(res=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(item);tx.oncomplete=res;tx.onerror=res;});}
+function deleteItemDB(id){return new Promise(res=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=res;tx.onerror=res;});}
 
-function getAllItems() {
-  return new Promise(res => {
-    const tx = db.transaction(STORE,'readonly');
-    const req = tx.objectStore(STORE).getAll();
-    req.onsuccess = () => res(req.result || []);
-    req.onerror = () => res([]);
-  });
-}
-
-function putItem(item) {
-  return new Promise(res => {
-    const tx = db.transaction(STORE,'readwrite');
-    tx.objectStore(STORE).put(item);
-    tx.oncomplete = res;
-    tx.onerror = res;
-  });
-}
-
-function deleteItemDB(id) {
-  return new Promise(res => {
-    const tx = db.transaction(STORE,'readwrite');
-    tx.objectStore(STORE).delete(id);
-    tx.oncomplete = res;
-    tx.onerror = res;
-  });
-}
-
-async function init() {
-  try { db = await openDB(); } catch(e) {}
-  if (db) {
-    items = await getAllItems();
-    if (items.length === 0) {
-      items = DEFAULTS;
-      for (const it of items) await putItem(it);
-    }
-    nextId = Math.max(...items.map(i=>i.id), 9) + 1;
+async function init(){
+  try{db=await openDB();}catch(e){}
+  if(db){
+    items=await getAllItems();
+    if(!items.length){items=DEFAULTS;for(const it of items)await putItem(it);}
+    nextId=Math.max(...items.map(i=>i.id),9)+1;
   } else {
-    // fallback localStorage
-    try {
-      const s = localStorage.getItem('ct-items');
-      items = s ? JSON.parse(s) : DEFAULTS;
-      nextId = Math.max(...items.map(i=>i.id), 9) + 1;
-    } catch(e) { items = DEFAULTS; }
+    try{const s=localStorage.getItem('ct-items');items=s?JSON.parse(s):DEFAULTS;nextId=Math.max(...items.map(i=>i.id),9)+1;}catch(e){items=DEFAULTS;}
   }
   render();
 }
+function saveLS(){try{localStorage.setItem('ct-items',JSON.stringify(items));}catch(e){}}
 
-function saveLS() {
-  try { localStorage.setItem('ct-items', JSON.stringify(items)); } catch(e) {}
+// Photo
+function triggerPhoto(){document.getElementById('f-photo').click();}
+function onPhotoSelected(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=800;let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      currentPhoto=c.toDataURL('image/jpeg',0.75);
+      showPreview(currentPhoto);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function showPreview(url){
+  document.getElementById('photo-placeholder').style.display='none';
+  document.getElementById('photo-preview-wrap').style.display='block';
+  document.getElementById('photo-preview').src=url;
+}
+function removePhoto(e){
+  e.stopPropagation();
+  currentPhoto=null;
+  document.getElementById('photo-placeholder').style.display='flex';
+  document.getElementById('photo-preview-wrap').style.display='none';
+  document.getElementById('f-photo').value='';
 }
 
-// UI
-function daysLeft(item) {
-  const last = new Date(item.lastReplaced);
-  const due = new Date(last); due.setDate(due.getDate()+item.cycle);
-  return Math.ceil((due - new Date()) / 86400000);
-}
-function statusOf(d) { return d<=0?'urgent':d<=7?'warning':'ok'; }
+// Render
+function daysLeft(item){const last=new Date(item.lastReplaced);const due=new Date(last);due.setDate(due.getDate()+item.cycle);return Math.ceil((due-new Date())/86400000);}
+function statusOf(d){return d<=0?'urgent':d<=7?'warning':'ok';}
 
-function render() {
-  const filtered = filter==='all' ? items : items.filter(i=>i.cat===filter);
-  const sorted = [...filtered].sort((a,b)=>daysLeft(a)-daysLeft(b));
-
+function render(){
+  const filtered=filter==='all'?items:items.filter(i=>i.cat===filter);
+  const sorted=[...filtered].sort((a,b)=>daysLeft(a)-daysLeft(b));
   let u=0,w=0,o=0;
   items.forEach(i=>{const d=daysLeft(i);d<=0?u++:d<=7?w++:o++;});
   document.getElementById('s-urgent').textContent=u;
   document.getElementById('s-warn').textContent=w;
   document.getElementById('s-ok').textContent=o;
-
-  const list = document.getElementById('list');
-  if (!sorted.length) {
-    list.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><p>アイテムがありません<br>＋ボタンで追加しましょう</p></div>`;
-    return;
-  }
-
-  list.innerHTML = sorted.map(item => {
-    const d = daysLeft(item);
-    const st = statusOf(d);
-    const hcount = (item.history||[]).length;
-    const lastFmt = item.lastReplaced.replace(/-/g,'/').slice(2);
-    const dLabel = d<=0 ? `${Math.abs(d)}日超過` : `あと${d}日`;
-    const dBig = d<=0 ? '!' : String(d);
+  const list=document.getElementById('list');
+  if(!sorted.length){list.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>アイテムがありません<br>＋ボタンで追加しましょう</p></div>';return;}
+  list.innerHTML=sorted.map(item=>{
+    const d=daysLeft(item),st=statusOf(d);
+    const hcount=(item.history||[]).length;
+    const lastFmt=item.lastReplaced.replace(/-/g,'/').slice(2);
+    const dBig=d<=0?'!':String(d);
+    const thumb=item.photo
+      ?`<div class="item-thumb" style="cursor:pointer" onclick="viewPhoto(${item.id})"><img src="${item.photo}" alt="${item.name}"/></div>`
+      :`<div class="item-thumb no-photo ${CAT_CLS[item.cat]||'icon-other'}">${item.icon||CAT_ICON[item.cat]||'📦'}</div>`;
     return `<div class="item-card">
   <div class="status-bar ${st}"></div>
   <div class="item-inner">
-    <div class="item-icon-wrap ${CAT_CLS[item.cat]||'icon-other'}">${item.icon||CAT_ICON[item.cat]||'📦'}</div>
+    ${thumb}
     <div class="item-body">
       <div class="item-name">${item.name}</div>
       <div class="item-sub">
-        <span>${item.cycle}日サイクル</span>
-        <span>前回 ${lastFmt}</span>
+        <span>${item.cycle}日サイクル</span><span>前回 ${lastFmt}</span>
         ${hcount>1?`<span class="history-pill">${hcount}回交換</span>`:''}
       </div>
     </div>
     <div class="item-right">
-      <div>
-        <div class="days-badge ${st}">${dBig}</div>
-        <div class="days-unit">${d<=0?'要交換':'日後'}</div>
-      </div>
+      <div><div class="days-badge ${st}">${dBig}</div><div class="days-unit">${d<=0?'要交換':'日後'}</div></div>
       <div class="item-btns">
-        <button class="ibtn ok-btn" title="今日交換した" onclick="doReset(${item.id})">✓</button>
-        <button class="ibtn" title="編集" onclick="doEdit(${item.id})">✎</button>
-        <button class="ibtn del-btn" title="削除" onclick="doDelete(${item.id})">✕</button>
+        <button class="ibtn ok-btn" onclick="doReset(${item.id})">✓</button>
+        <button class="ibtn" onclick="doEdit(${item.id})">✎</button>
+        <button class="ibtn del-btn" onclick="doDelete(${item.id})">✕</button>
       </div>
     </div>
   </div>
@@ -663,93 +328,81 @@ function render() {
   }).join('');
 }
 
-async function doReset(id) {
-  const item = items.find(i=>i.id===id); if(!item) return;
-  const today = new Date().toISOString().slice(0,10);
-  item.history = [...(item.history||[]), today];
-  item.lastReplaced = today;
-  if(db) await putItem(item); else saveLS();
-  render();
-  toast('✓ 交換記録しました');
+function viewPhoto(id){
+  const item=items.find(i=>i.id===id);
+  if(!item||!item.photo)return;
+  document.getElementById('viewer-img').src=item.photo;
+  document.getElementById('photo-viewer').classList.add('open');
 }
+function closeViewer(){document.getElementById('photo-viewer').classList.remove('open');}
 
-async function doDelete(id) {
-  if(!confirm('このアイテムを削除しますか？')) return;
-  items = items.filter(i=>i.id!==id);
-  if(db) await deleteItemDB(id); else saveLS();
-  render();
-  toast('削除しました');
+async function doReset(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  const today=new Date().toISOString().slice(0,10);
+  item.history=[...(item.history||[]),today];item.lastReplaced=today;
+  if(db)await putItem(item);else saveLS();
+  render();toast('✓ 交換記録しました');
 }
-
-function doEdit(id) {
-  const item = items.find(i=>i.id===id); if(!item) return;
-  editId = id;
-  document.getElementById('modal-title').textContent = '編集';
-  document.getElementById('f-name').value = item.name;
-  document.getElementById('f-cycle').value = item.cycle;
-  document.getElementById('f-date').value = item.lastReplaced;
-  selCatVal = item.cat;
+async function doDelete(id){
+  if(!confirm('このアイテムを削除しますか？'))return;
+  items=items.filter(i=>i.id!==id);
+  if(db)await deleteItemDB(id);else saveLS();
+  render();toast('削除しました');
+}
+function doEdit(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  editId=id;
+  document.getElementById('modal-title').textContent='編集';
+  document.getElementById('f-name').value=item.name;
+  document.getElementById('f-cycle').value=item.cycle;
+  document.getElementById('f-date').value=item.lastReplaced;
+  selCatVal=item.cat;
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('sel',b.dataset.cat===selCatVal));
+  currentPhoto=item.photo||null;
+  if(currentPhoto)showPreview(currentPhoto);
+  else{document.getElementById('photo-placeholder').style.display='flex';document.getElementById('photo-preview-wrap').style.display='none';}
   document.getElementById('modal-bg').classList.add('open');
 }
-
-function openModal() {
-  editId = null;
-  document.getElementById('modal-title').textContent = 'アイテムを追加';
-  document.getElementById('f-name').value = '';
-  document.getElementById('f-cycle').value = '';
-  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-  selCatVal = 'bath';
+function openModal(){
+  editId=null;
+  document.getElementById('modal-title').textContent='アイテムを追加';
+  document.getElementById('f-name').value='';
+  document.getElementById('f-cycle').value='';
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  selCatVal='bath';
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('sel',b.dataset.cat==='bath'));
+  currentPhoto=null;
+  document.getElementById('photo-placeholder').style.display='flex';
+  document.getElementById('photo-preview-wrap').style.display='none';
+  document.getElementById('f-photo').value='';
   document.getElementById('modal-bg').classList.add('open');
-  setTimeout(()=>document.getElementById('f-name').focus(), 300);
+  setTimeout(()=>document.getElementById('f-name').focus(),300);
 }
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+function bgClick(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+function selCat(cat,el){selCatVal=cat;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
 
-function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
-function bgClick(e) { if(e.target===document.getElementById('modal-bg')) closeModal(); }
-
-function selCat(cat, el) {
-  selCatVal = cat;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
-}
-
-async function saveItem() {
-  const name = document.getElementById('f-name').value.trim();
-  const cycle = parseInt(document.getElementById('f-cycle').value);
-  const date = document.getElementById('f-date').value;
-  if(!name||!cycle||!date) { toast('⚠ 全項目を入力してください'); return; }
-
-  if(editId) {
-    const item = items.find(i=>i.id===editId);
-    if(item) { item.name=name; item.cycle=cycle; item.lastReplaced=date; item.cat=selCatVal; item.icon=CAT_ICON[selCatVal]; }
-    if(db) await putItem(item); else saveLS();
+async function saveItem(){
+  const name=document.getElementById('f-name').value.trim();
+  const cycle=parseInt(document.getElementById('f-cycle').value);
+  const date=document.getElementById('f-date').value;
+  if(!name||!cycle||!date){toast('⚠ 全項目を入力してください');return;}
+  if(editId){
+    const item=items.find(i=>i.id===editId);
+    if(item){item.name=name;item.cycle=cycle;item.lastReplaced=date;item.cat=selCatVal;item.icon=CAT_ICON[selCatVal];item.photo=currentPhoto;}
+    if(db)await putItem(item);else saveLS();
     toast('更新しました');
   } else {
-    const item = {id:nextId++, name, cat:selCatVal, cycle, lastReplaced:date, icon:CAT_ICON[selCatVal], history:[date]};
+    const item={id:nextId++,name,cat:selCatVal,cycle,lastReplaced:date,icon:CAT_ICON[selCatVal],history:[date],photo:currentPhoto};
     items.push(item);
-    if(db) await putItem(item); else saveLS();
+    if(db)await putItem(item);else saveLS();
     toast('追加しました');
   }
-  closeModal();
-  render();
+  closeModal();render();
 }
-
-function setFilter(f, el) {
-  filter = f;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
+function setFilter(f,el){filter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');render();}
 let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 2000);
-}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 
 init();
 </script>
